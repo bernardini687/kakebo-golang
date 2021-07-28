@@ -3,6 +3,7 @@ package kakebo
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/shopspring/decimal"
 )
@@ -59,6 +60,44 @@ func CalcMonth(monthData string) (decimal.Decimal, error) {
 	return tot, nil
 }
 
+// DisplayMonth
+//
+// Example:
+//
+//     January 2020
+//
+//     Foo	1,2
+//     Bar	3,45
+//     Baz	6,00
+//
+//     Tot	10,65
+//
+func DisplayMonth(monthData string, period time.Time) (string, error) {
+	// TODO: potential sub-optimal solution:
+	// when building the month display, we would iterate once for the total
+	// and a second time for the formatting of the display rows.
+	//
+	// modularity vs. efficiency issue?
+	//
+	tot, err := CalcMonth(monthData)
+	if err != nil {
+		return "", err
+	}
+
+	var display []string
+
+	display = append(display, fmt.Sprintln(period.Month(), period.Year()))
+
+	// TODO: build each line from `monthData`
+	display = append(display, fmt.Sprintf("%s\t%s", "Foo", "1,2"))
+	display = append(display, fmt.Sprintf("%s\t%s", "Bar", "2,45"))
+	display = append(display, fmt.Sprintf("%s\t%s", "Xyzzy", "6,00"))
+
+	display = append(display, fmt.Sprintf("\nTot\t%s\n", tot))
+
+	return strings.Join(display, "\n"), nil
+}
+
 const (
 	monthly int64 = 1
 	yearly  int64 = 12
@@ -89,12 +128,6 @@ func calcDue(fields []string) (decimal.Decimal, error) {
 	return amount.Div(decimal.NewFromInt(interval)), nil
 }
 
-// TODO: potential sub-optimal solution:
-// when building the month display, we would iterate once for the total
-// and a second time for the formatting of the display rows.
-//
-// modularity vs. efficiency issue?
-//
 func calcEntry(fields []string) (decimal.Decimal, error) {
 	if len(fields) < 1 {
 		return decimal.Decimal{}, fmt.Errorf("at least 1 field required")
