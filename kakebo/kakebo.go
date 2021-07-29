@@ -8,6 +8,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// TODO:
+// monthData should be coming from MM.txt files.
+// i should make shure those files contains only valid amounts.
+// so one missing function should be one that takes an input and checks for errors, giving back only valid amounts when no error
+// happened.
+// thus, any monthData should be treated as a non-empty MM.txt content that only contains valid amounts!
+// CalcMonth() and entriesForDisplay() should be affected!
+
 // CalcBalance
 //
 // Example:
@@ -46,10 +54,10 @@ func CalcBalance(duesData string) (decimal.Decimal, error) {
 func CalcMonth(monthData string) (decimal.Decimal, error) {
 	entries := strings.Trim(monthData, "\n") // TODO: much similar to CalcBalance, introduce tests then refactor!
 
-	var tot decimal.Decimal
+	var tot decimal.Decimal // container, could be a generic pointer
 
 	for _, entry := range strings.Split(entries, "\n") {
-		val, err := calcEntry(strings.Fields(entry))
+		val, err := calcEntry(strings.Fields(entry)) // function to process each field of the single line
 		if err != nil {
 			return decimal.Decimal{}, err
 		}
@@ -73,11 +81,11 @@ func CalcMonth(monthData string) (decimal.Decimal, error) {
 //     Tot	10,65
 //
 func DisplayMonth(monthData string, period time.Time) (string, error) {
-	// TODO: potential sub-optimal solution:
-	// when building the month display, we would iterate once for the total
-	// and a second time for the formatting of the display rows.
-	//
-	// modularity vs. efficiency issue?
+	// here we iterate once over `monthData` to calculate the total.
+	// we'll iterate a second time when `entriesForDisplay()` runs.
+	// not ideal, but:
+	//   1) `displayMonth` will hardly contain a lot of lines
+	//   2) `CalcMonth` checks for errors, so if `entriesForDisplay()` runs, we can assume the data is good
 	//
 	tot, err := CalcMonth(monthData)
 	if err != nil {
@@ -87,12 +95,7 @@ func DisplayMonth(monthData string, period time.Time) (string, error) {
 	var display []string
 
 	display = append(display, fmt.Sprintln(period.Month(), period.Year()))
-
-	// TODO: build each line from `monthData`
-	display = append(display, fmt.Sprintf("%s\t%s", "Foo", "1,2"))
-	display = append(display, fmt.Sprintf("%s\t%s", "Bar", "2,45"))
-	display = append(display, fmt.Sprintf("%s\t%s", "Xyzzy", "6,00"))
-
+	display = append(display, entriesForDisplay(monthData)...)
 	display = append(display, fmt.Sprintf("\nTot\t%s\n", tot))
 
 	return strings.Join(display, "\n"), nil
@@ -140,3 +143,21 @@ func calcEntry(fields []string) (decimal.Decimal, error) {
 
 	return amount, nil
 }
+
+func entriesForDisplay(monthData string) []string {
+	entries := strings.Split(strings.Trim(monthData, "\n"), "\n")
+
+	for i, entry := range entries {
+		fields := strings.Fields(entry)
+		// this function is meant to run after a call to `CalcMonth()` thus,
+		// the input data has already been checked for errors
+		amount, _ := decimal.NewFromString(fields[0])
+		entries[i] = fmt.Sprintf("%s\t%s", strings.Title(fields[1]), amount.StringFixed(2))
+	}
+
+	return entries
+}
+
+// func lines(data string) []string {
+// 	return strings.Split(strings.Trim(data, "\n"), "\n")
+// }
