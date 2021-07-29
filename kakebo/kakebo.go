@@ -26,20 +26,7 @@ import (
 //     789 Y xyzzy
 //
 func CalcBalance(duesData string) (decimal.Decimal, error) {
-	dues := strings.Trim(duesData, "\n")
-
-	var balance decimal.Decimal
-
-	for _, due := range strings.Split(dues, "\n") {
-		net, err := calcDue(strings.Fields(due))
-		if err != nil {
-			return decimal.Decimal{}, err
-		}
-
-		balance = balance.Add(net)
-	}
-
-	return balance, nil
+	return sumValues(duesData, extractDueValue)
 }
 
 // CalcMonth
@@ -52,20 +39,7 @@ func CalcBalance(duesData string) (decimal.Decimal, error) {
 //     78.09 xyzzy
 //
 func CalcMonth(monthData string) (decimal.Decimal, error) {
-	entries := strings.Trim(monthData, "\n") // TODO: much similar to CalcBalance, introduce tests then refactor!
-
-	var tot decimal.Decimal // container, could be a generic pointer
-
-	for _, entry := range strings.Split(entries, "\n") {
-		val, err := calcEntry(strings.Fields(entry)) // function to process each field of the single line
-		if err != nil {
-			return decimal.Decimal{}, err
-		}
-
-		tot = tot.Add(val)
-	}
-
-	return tot, nil
+	return sumValues(monthData, extractEntryValue)
 }
 
 // DisplayMonth
@@ -113,7 +87,7 @@ var intervalDictionary = map[string]int64{
 	"Y": yearly,
 }
 
-func calcDue(fields []string) (decimal.Decimal, error) {
+func extractDueValue(fields []string) (decimal.Decimal, error) {
 	if len(fields) < 2 {
 		return decimal.Decimal{}, fmt.Errorf("at least 2 fields required")
 	}
@@ -131,7 +105,7 @@ func calcDue(fields []string) (decimal.Decimal, error) {
 	return amount.Div(decimal.NewFromInt(interval)), nil
 }
 
-func calcEntry(fields []string) (decimal.Decimal, error) {
+func extractEntryValue(fields []string) (decimal.Decimal, error) {
 	if len(fields) < 1 {
 		return decimal.Decimal{}, fmt.Errorf("at least 1 field required")
 	}
@@ -145,7 +119,7 @@ func calcEntry(fields []string) (decimal.Decimal, error) {
 }
 
 func entriesForDisplay(monthData string) []string {
-	entries := strings.Split(strings.Trim(monthData, "\n"), "\n")
+	entries := lines(monthData)
 
 	for i, entry := range entries {
 		fields := strings.Fields(entry)
@@ -158,6 +132,21 @@ func entriesForDisplay(monthData string) []string {
 	return entries
 }
 
-// func lines(data string) []string {
-// 	return strings.Split(strings.Trim(data, "\n"), "\n")
-// }
+func sumValues(data string, extractor func([]string) (decimal.Decimal, error)) (decimal.Decimal, error) {
+	var tot decimal.Decimal
+
+	for _, line := range lines(data) {
+		val, err := extractor(strings.Fields(line))
+		if err != nil {
+			return decimal.Decimal{}, err
+		}
+
+		tot = tot.Add(val)
+	}
+
+	return tot, nil
+}
+
+func lines(data string) []string {
+	return strings.Split(strings.Trim(data, "\n"), "\n")
+}
