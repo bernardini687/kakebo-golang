@@ -5,6 +5,71 @@ import (
 	"time"
 )
 
+// Test FormatEntries
+//
+// func TestFormatEntries(t *testing.T) {
+// 	data := `1.2 foo
+// 3.45 bar
+// 6 baz
+// 78.09 xyzzy
+// `
+// 	want := `Foo	1.20
+// Bar	3.45
+// Baz	6.00
+// Xyzzy	8.09
+// `
+
+// 	got, err := FormatEntries(data)
+
+// 	if got != want || err != nil {
+// 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: %#v, `<nil>`", got, err, want)
+// 	}
+// }
+
+// func TestFormatEntriesFieldsErr(t *testing.T) {
+// 	data := `1.2 foo
+
+// 6 baz
+// 78.09 xyzzy
+// `
+// 	want := "at least 1 field required"
+
+// 	got, err := FormatEntries(data)
+// 	message := err.Error()
+
+// 	if message != want || got != "" {
+// 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", got, message, want)
+// 	}
+// }
+
+// func TestFormatEntriesEmptyErr(t *testing.T) {
+// 	data := ""
+// 	want := "at least 1 field required"
+
+// 	got, err := FormatEntries(data)
+// 	message := err.Error()
+
+// 	if message != want || got != "" {
+// 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", got, message, want)
+// 	}
+// }
+
+// func TestFormatEntriesAmountErr(t *testing.T) {
+// 	data := `1.2 foo
+// bar
+// 6 baz
+// 78.09 xyzzy
+// `
+// 	want := "can't convert bar to decimal"
+
+// 	got, err := FormatEntries(data)
+// 	message := err.Error()
+
+// 	if message != want || got != "" {
+// 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", got, message, want)
+// 	}
+// }
+
 // Test CalcBalance
 //
 func TestCalcBalance(t *testing.T) {
@@ -34,7 +99,7 @@ func TestCalcBalanceFieldsErr(t *testing.T) {
 	message := err.Error()
 	balance := got.StringFixed(2)
 
-	if balance != "0.00" || message != want {
+	if message != want || balance != "0.00" {
 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", balance, message, want)
 	}
 }
@@ -47,7 +112,7 @@ func TestCalcBalanceEmptyErr(t *testing.T) {
 	message := err.Error()
 	balance := got.StringFixed(2)
 
-	if balance != "0.00" || message != want {
+	if message != want || balance != "0.00" {
 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", balance, message, want)
 	}
 }
@@ -63,7 +128,7 @@ func TestCalcBalanceAmountErr(t *testing.T) {
 	message := err.Error()
 	balance := got.StringFixed(2)
 
-	if balance != "0.00" || message != want {
+	if message != want || balance != "0.00" {
 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", balance, message, want)
 	}
 }
@@ -79,22 +144,22 @@ func TestCalcBalanceIntervalErr(t *testing.T) {
 	message := err.Error()
 	balance := got.StringFixed(2)
 
-	if balance != "0.00" || message != want {
+	if message != want || balance != "0.00" {
 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", balance, message, want)
 	}
 }
 
-// Test CalcBalance
+// Test CalcMonth
 //
 func TestCalcMonth(t *testing.T) {
-	data := `1.2 foo
-3.45 bar
-6 baz
-78.09 xyzzy
+	monthData := `Foo	1.20
+Bar	3.45
+Baz	6.00
+Xyzzy	78.09
 `
 	want := "88.74"
 
-	got, err := CalcMonth(data)
+	got, err := CalcMonth(monthData)
 	balance := got.StringFixed(2)
 
 	if balance != want || err != nil {
@@ -102,73 +167,26 @@ func TestCalcMonth(t *testing.T) {
 	}
 }
 
-func TestCalcMonthFieldsErr(t *testing.T) {
-	data := `1.2 foo
-
-6 baz
-78.09 xyzzy
-`
-	want := "at least 1 field required"
-
-	got, err := CalcMonth(data)
-	message := err.Error()
-	balance := got.StringFixed(2)
-
-	if balance != "0.00" || message != want {
-		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", balance, message, want)
-	}
-}
-
-func TestCalcMonthEmptyErr(t *testing.T) {
-	data := ""
-	want := "at least 1 field required"
-
-	got, err := CalcMonth(data)
-	message := err.Error()
-	balance := got.StringFixed(2)
-
-	if balance != "0.00" || message != want {
-		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", balance, message, want)
-	}
-}
-
-func TestCalcMonthAmountErr(t *testing.T) {
-	data := `1.2 foo
-bar
-6 baz
-78.09 xyzzy
-`
-	want := "can't convert bar to decimal"
-
-	got, err := CalcMonth(data)
-	message := err.Error()
-	balance := got.StringFixed(2)
-
-	if balance != "0.00" || message != want {
-		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", balance, message, want)
-	}
-}
-
 // Test DisplayMonth
 //
 func TestDisplayMonth(t *testing.T) {
-	data := `1.2 foo
-3.45 bar
-6 baz
-78.09 xyzzy
-`
-	want := `November 2009
-
-Foo	1.20
+	monthData := `Foo	1.20
 Bar	3.45
 Baz	6.00
 Xyzzy	78.09
+`
+	want := `November 2009
 
-Tot	88.74
+Foo	1,20
+Bar	3,45
+Baz	6,00
+Xyzzy	78,09
+
+Tot	88,74
 `
 
 	date := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
-	got, err := DisplayMonth(data, date)
+	got, err := DisplayMonth(monthData, date)
 
 	if got != want || err != nil {
 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: %#v, `<nil>`", got, err, want)

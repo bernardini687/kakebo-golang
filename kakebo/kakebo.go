@@ -8,35 +8,55 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// TODO:
-// monthData should be coming from MM.txt files.
-// i should make shure those files contains only valid amounts.
-// so one missing function should be one that takes an input and checks for errors, giving back only valid amounts when no error
-// happened.
-// thus, any monthData should be treated as a non-empty MM.txt content that only contains valid amounts!
-// CalcMonth() and entriesForDisplay() should be affected!
+// FormatEntries
+//
+// Input example:
+//
+//     1,2 foo
+//     3,45 bar
+//     6 baz
+//     78.09 xyzzy
+//
+// Output example:
+//
+//     Foo	1.20
+//     Bar	3.45
+//     Baz	6.00
+//     Xyzzy	78.09
+//
+func FormatEntries(entryData string) (string, error) {
+	return "", nil
+}
 
 // CalcBalance
 //
-// Example:
+// Input example:
 //
 //     -120 y foo
 //     -34.5 m bar
 //     -6 M baz
 //     789 Y xyzzy
 //
-func CalcBalance(duesData string) (decimal.Decimal, error) {
-	return sumValues(duesData, extractDueValue)
+// Output example:
+//
+//     15.25
+//
+func CalcBalance(dueData string) (decimal.Decimal, error) {
+	return sumValues(dueData, extractDueValue)
 }
 
 // CalcMonth
 //
-// Example:
+// Input example:
 //
-//     1.2 foo
-//     3.45 bar
-//     6 baz
-//     78.09 xyzzy
+//     Foo	1.20
+//     Bar	3.45
+//     Baz	6.00
+//     Xyzzy	78.09
+//
+// Output example:
+//
+//     88.74
 //
 func CalcMonth(monthData string) (decimal.Decimal, error) {
 	return sumValues(monthData, extractEntryValue)
@@ -44,7 +64,13 @@ func CalcMonth(monthData string) (decimal.Decimal, error) {
 
 // DisplayMonth
 //
-// Example:
+// Input example:
+//
+//     Foo	1.20
+//     Bar	3.45
+//     Baz	6.00
+//
+// Output example:
 //
 //     January 2020
 //
@@ -55,24 +81,20 @@ func CalcMonth(monthData string) (decimal.Decimal, error) {
 //     Tot	10,65
 //
 func DisplayMonth(monthData string, period time.Time) (string, error) {
-	// here we iterate once over `monthData` to calculate the total.
-	// we'll iterate a second time when `entriesForDisplay()` runs.
-	// not ideal, but:
-	//   1) `displayMonth` will hardly contain a lot of lines
-	//   2) `CalcMonth` checks for errors, so if `entriesForDisplay()` runs, we can assume the data is good
-	//
 	tot, err := CalcMonth(monthData)
 	if err != nil {
 		return "", err
 	}
 
-	var display []string
+	var lines []string
 
-	display = append(display, fmt.Sprintln(period.Month(), period.Year()))
-	display = append(display, entriesForDisplay(monthData)...)
-	display = append(display, fmt.Sprintf("\nTot\t%s\n", tot))
+	lines = append(lines, fmt.Sprintln(period.Month(), period.Year()))
+	lines = append(lines, monthData)
+	lines = append(lines, fmt.Sprintf("Tot\t%s\n", tot))
 
-	return strings.Join(display, "\n"), nil
+	display := strings.Join(lines, "\n")
+
+	return strings.ReplaceAll(display, ".", ","), nil
 }
 
 const (
@@ -106,31 +128,21 @@ func extractDueValue(fields []string) (decimal.Decimal, error) {
 }
 
 func extractEntryValue(fields []string) (decimal.Decimal, error) {
-	if len(fields) < 1 {
-		return decimal.Decimal{}, fmt.Errorf("at least 1 field required")
-	}
-
-	amount, err := decimal.NewFromString(fields[0])
-	if err != nil {
-		return decimal.Decimal{}, err
-	}
-
-	return amount, nil
+	return decimal.NewFromString(fields[1])
 }
 
-func entriesForDisplay(monthData string) []string {
-	entries := lines(monthData)
+// func extractEntryValue(fields []string) (decimal.Decimal, error) {
+// 	if len(fields) < 1 {
+// 		return decimal.Decimal{}, fmt.Errorf("at least 1 field required")
+// 	}
 
-	for i, entry := range entries {
-		fields := strings.Fields(entry)
-		// this function is meant to run after a call to `CalcMonth()` thus,
-		// the input data has already been checked for errors
-		amount, _ := decimal.NewFromString(fields[0])
-		entries[i] = fmt.Sprintf("%s\t%s", strings.Title(fields[1]), amount.StringFixed(2))
-	}
+// 	amount, err := decimal.NewFromString(fields[0])
+// 	if err != nil {
+// 		return decimal.Decimal{}, err
+// 	}
 
-	return entries
-}
+// 	return amount, nil
+// }
 
 func sumValues(data string, extractor func([]string) (decimal.Decimal, error)) (decimal.Decimal, error) {
 	var tot decimal.Decimal
