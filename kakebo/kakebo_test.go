@@ -7,68 +7,68 @@ import (
 
 // Test FormatEntries
 //
-// func TestFormatEntries(t *testing.T) {
-// 	data := `1.2 foo
-// 3.45 bar
-// 6 baz
-// 78.09 xyzzy
-// `
-// 	want := `Foo	1.20
-// Bar	3.45
-// Baz	6.00
-// Xyzzy	8.09
-// `
+func TestFormatEntries(t *testing.T) {
+	data := `1.2 foo
+3.45 bar
+6 baz
+78.09 xyzzy
+`
+	want := `Foo	1.20
+Bar	3.45
+Baz	6.00
+Xyzzy	78.09
+`
 
-// 	got, err := FormatEntries(data)
+	got, err := FormatEntries(data)
 
-// 	if got != want || err != nil {
-// 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: %#v, `<nil>`", got, err, want)
-// 	}
-// }
+	if got != want || err != nil {
+		t.Fatalf("\n GOT: %#v, `%v`\nWANT: %#v, `<nil>`", got, err, want)
+	}
+}
 
-// func TestFormatEntriesFieldsErr(t *testing.T) {
-// 	data := `1.2 foo
+func TestFormatEntriesFieldsErr(t *testing.T) {
+	data := `1.2 foo
+3.45
+6 baz
+78.09 xyzzy
+`
+	want := "at least 2 fields required"
 
-// 6 baz
-// 78.09 xyzzy
-// `
-// 	want := "at least 1 field required"
+	got, err := FormatEntries(data)
+	message := err.Error()
 
-// 	got, err := FormatEntries(data)
-// 	message := err.Error()
+	if message != want || got != "" {
+		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", got, message, want)
+	}
+}
 
-// 	if message != want || got != "" {
-// 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", got, message, want)
-// 	}
-// }
+func TestFormatEntriesEmptyErr(t *testing.T) {
+	data := ""
+	want := "at least 2 fields required"
 
-// func TestFormatEntriesEmptyErr(t *testing.T) {
-// 	data := ""
-// 	want := "at least 1 field required"
+	got, err := FormatEntries(data)
+	message := err.Error()
 
-// 	got, err := FormatEntries(data)
-// 	message := err.Error()
+	if message != want || got != "" {
+		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", got, message, want)
+	}
+}
 
-// 	if message != want || got != "" {
-// 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", got, message, want)
-// 	}
-// }
+func TestFormatEntriesAmountErr(t *testing.T) {
+	data := `1.2 foo
+bar bar
+6 baz
+78.09 xyzzy
+`
+	want := "can't convert bar to decimal"
 
-// func TestFormatEntriesAmountErr(t *testing.T) {
-// 	data := `1.2 foo
-// bar
-// 6 baz
-// 78.09 xyzzy
-// `
-// 	want := "can't convert bar to decimal"
+	got, err := FormatEntries(data)
+	message := err.Error()
 
-// 	got, err := FormatEntries(data)
-// 	message := err.Error()
-
-// 	if message != want || got != "" {
-// 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", got, message, want)
-// 	}
-// }
+	if message != want || got != "" {
+		t.Fatalf("\n GOT: %#v, `%v`\nWANT: \"0.00\", `%v`", got, message, want)
+	}
+}
 
 // Test CalcBalance
 //

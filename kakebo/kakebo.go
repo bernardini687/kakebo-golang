@@ -25,7 +25,18 @@ import (
 //     Xyzzy	78.09
 //
 func FormatEntries(entryData string) (string, error) {
-	return "", nil
+	var formattedEntries []string
+
+	for _, line := range lines(entryData) {
+		entry, err := formatEntry(strings.Fields(line))
+		if err != nil {
+			return "", err
+		}
+
+		formattedEntries = append(formattedEntries, entry)
+	}
+
+	return strings.Join(formattedEntries, ""), nil
 }
 
 // CalcBalance
@@ -59,7 +70,7 @@ func CalcBalance(dueData string) (decimal.Decimal, error) {
 //     88.74
 //
 func CalcMonth(monthData string) (decimal.Decimal, error) {
-	return sumValues(monthData, extractEntryValue)
+	return sumValues(monthData, extractFormattedEntryValue)
 }
 
 // DisplayMonth
@@ -127,22 +138,22 @@ func extractDueValue(fields []string) (decimal.Decimal, error) {
 	return amount.Div(decimal.NewFromInt(interval)), nil
 }
 
-func extractEntryValue(fields []string) (decimal.Decimal, error) {
+func extractFormattedEntryValue(fields []string) (decimal.Decimal, error) {
 	return decimal.NewFromString(fields[1])
 }
 
-// func extractEntryValue(fields []string) (decimal.Decimal, error) {
-// 	if len(fields) < 1 {
-// 		return decimal.Decimal{}, fmt.Errorf("at least 1 field required")
-// 	}
+func formatEntry(fields []string) (string, error) {
+	if len(fields) < 2 {
+		return "", fmt.Errorf("at least 2 fields required")
+	}
 
-// 	amount, err := decimal.NewFromString(fields[0])
-// 	if err != nil {
-// 		return decimal.Decimal{}, err
-// 	}
+	amount, err := decimal.NewFromString(fields[0])
+	if err != nil {
+		return "", err
+	}
 
-// 	return amount, nil
-// }
+	return fmt.Sprintf("%s\t%s\n", strings.Title(fields[1]), amount.StringFixed(2)), nil
+}
 
 func sumValues(data string, extractor func([]string) (decimal.Decimal, error)) (decimal.Decimal, error) {
 	var tot decimal.Decimal
