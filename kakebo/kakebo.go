@@ -91,25 +91,63 @@ func CalcMonth(monthData string) (decimal.Decimal, error) {
 //
 //     Tot	10,65
 //
-func DisplayMonth(period time.Time, monthData string, tot decimal.Decimal) (string, error) {
+func DisplayMonth(period time.Time, monthData string, monthTot decimal.Decimal) (string, error) {
 	var lines []string
 
-	lines = append(lines, fmt.Sprintln(period.Month(), period.Year()))
-	lines = append(lines, monthData)
-	lines = append(lines, fmt.Sprintf("Tot\t%s\n", tot.StringFixed(2)))
+	lines = append(lines, fmt.Sprintln(period.Month(), period.Year()))       // header
+	lines = append(lines, monthData)                                         // body
+	lines = append(lines, fmt.Sprintf("Tot\t%s\n", monthTot.StringFixed(2))) // footer
 
 	display := strings.Join(lines, "\n")
 
 	return strings.ReplaceAll(display, ".", ","), nil
 }
 
-// TODO:
+// DisplayStats
 //
-// SaveGoal(BUDGET, KEIKO_GOAL)
-// MonthlyBudget(BUDGET, SAVE_GOAL)
-// DailyBudget(MONTHLY_BUDGET)
-// EndOfMonthPercentage()
-// SpentAmountPercentage(MONTHLY_BUDGET, MONTH_TOT)
+// Input example:
+//
+//     TODO: proper input example
+//     CalcBalance(), CalcMonth(), 35
+//
+// Output example:
+//
+//     Save goal	100,00
+//
+//     Monthly budget	500,00
+//     Daily budget	5,00
+//
+//     End of month	70%
+//     Amount spent	90%
+//
+func DisplayStats(balance, monthTot decimal.Decimal, savePercentage int) (string, error) {
+	// check savePercentage
+
+	// saveGoal := balance / 100 * savePercentage
+
+	// monthlyBudget := balance - saveGoal
+
+	// now := time.Now()
+
+	// monthDays := ?
+
+	// dailyBudget := monthlyBudget / monthDays
+
+	// endOfMonthPercentage := 100 * now.Day() / monthDays
+
+	// spentAmountPercentage := 100 * monthTot / monthlyBudget
+
+	// stats := map[string]string{
+	// 	"Save goal":      saveGoal,
+	// 	"Monthly budget": monthlyBudget,
+	// 	"Daily budget":   dailyBudget,
+	// 	"End of month":   endOfMonthPercentage,
+	// 	"Amount spent":   spentAmountPercentage,
+	// }
+	// formatStats(stats)
+
+	return "", nil
+}
 
 const (
 	monthly int64 = 1
