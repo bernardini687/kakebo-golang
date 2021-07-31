@@ -91,22 +91,25 @@ func CalcMonth(monthData string) (decimal.Decimal, error) {
 //
 //     Tot	10,65
 //
-func DisplayMonth(monthData string, period time.Time) (string, error) {
-	tot, err := CalcMonth(monthData)
-	if err != nil {
-		return "", err
-	}
-
+func DisplayMonth(period time.Time, monthData string, tot decimal.Decimal) (string, error) {
 	var lines []string
 
 	lines = append(lines, fmt.Sprintln(period.Month(), period.Year()))
 	lines = append(lines, monthData)
-	lines = append(lines, fmt.Sprintf("Tot\t%s\n", tot))
+	lines = append(lines, fmt.Sprintf("Tot\t%s\n", tot.StringFixed(2)))
 
 	display := strings.Join(lines, "\n")
 
 	return strings.ReplaceAll(display, ".", ","), nil
 }
+
+// TODO:
+//
+// SaveGoal(BUDGET, KEIKO_GOAL)
+// MonthlyBudget(BUDGET, SAVE_GOAL)
+// DailyBudget(MONTHLY_BUDGET)
+// EndOfMonthPercentage()
+// SpentAmountPercentage(MONTHLY_BUDGET, MONTH_TOT)
 
 const (
 	monthly int64 = 1

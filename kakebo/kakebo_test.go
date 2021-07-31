@@ -186,7 +186,8 @@ Tot	88,74
 `
 
 	date := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
-	got, err := DisplayMonth(monthData, date)
+	tot, _ := CalcMonth(monthData)
+	got, err := DisplayMonth(date, monthData, tot)
 
 	if got != want || err != nil {
 		t.Fatalf("\n GOT: %#v, `%v`\nWANT: %#v, `<nil>`", got, err, want)
