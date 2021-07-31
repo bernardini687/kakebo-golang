@@ -1,4 +1,4 @@
-module tmp/kakebo-golang
+module github.com/bernardini687/kakebo-golang
 
 go 1.16
 
