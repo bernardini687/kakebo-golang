@@ -26,6 +26,25 @@ Xyzzy	78.09
 	}
 }
 
+func TestFormatEntriesComma(t *testing.T) {
+	data := `1,2 foo
+3,45 bar
+6 baz
+78,09 xyzzy
+`
+	want := `Foo	1.20
+Bar	3.45
+Baz	6.00
+Xyzzy	78.09
+`
+
+	got, err := FormatEntries(data)
+
+	if got != want || err != nil {
+		t.Fatalf("\n GOT: %#v, `%v`\nWANT: %#v, `<nil>`", got, err, want)
+	}
+}
+
 func TestFormatEntriesFieldsErr(t *testing.T) {
 	data := `1.2 foo
 3.45
@@ -187,9 +206,9 @@ Tot	88,74
 
 	date := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 	tot, _ := CalcMonth(monthData)
-	got, err := DisplayMonth(date, monthData, tot)
+	got := DisplayMonth(date, monthData, tot)
 
-	if got != want || err != nil {
-		t.Fatalf("\n GOT: %#v, `%v`\nWANT: %#v, `<nil>`", got, err, want)
+	if got != want {
+		t.Fatalf("\n GOT: %#v\nWANT: %#v", got, want)
 	}
 }

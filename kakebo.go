@@ -91,7 +91,7 @@ func CalcMonth(monthData string) (decimal.Decimal, error) {
 //
 //     Tot	10,65
 //
-func DisplayMonth(period time.Time, monthData string, monthTot decimal.Decimal) (string, error) {
+func DisplayMonth(period time.Time, monthData string, monthTot decimal.Decimal) string {
 	var lines []string
 
 	lines = append(lines, fmt.Sprintln(period.Month(), period.Year()))       // header
@@ -100,7 +100,7 @@ func DisplayMonth(period time.Time, monthData string, monthTot decimal.Decimal) 
 
 	display := strings.Join(lines, "\n")
 
-	return strings.ReplaceAll(display, ".", ","), nil
+	return strings.ReplaceAll(display, ".", ",")
 }
 
 // DisplayStats
@@ -188,7 +188,8 @@ func formatEntry(fields []string) (string, error) {
 		return "", fmt.Errorf("at least 2 fields required")
 	}
 
-	amount, err := decimal.NewFromString(fields[0])
+	s := strings.Replace(fields[0], ",", ".", 1)
+	amount, err := decimal.NewFromString(s)
 	if err != nil {
 		return "", err
 	}
