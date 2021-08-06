@@ -3,6 +3,8 @@ package kakebo
 import (
 	"testing"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 // Test FormatEntries
@@ -201,12 +203,35 @@ Bar	3,45
 Baz	6,00
 Xyzzy	78,09
 
-Tot	88,74
+Tot	100,00
 `
 
 	date := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
-	tot, _ := CalcMonth(monthData)
+	tot := decimal.NewFromInt(100)
 	got := DisplayMonth(date, monthData, tot)
+
+	if got != want {
+		t.Fatalf("\n GOT: %#v\nWANT: %#v", got, want)
+	}
+}
+
+// Test DisplayStats
+//
+func TestDisplayStats(t *testing.T) {
+	want := `10 November 2009
+
+Save goal	100,00
+Monthly budget	900,00
+Daily budget	30,00
+
+End of month	33%
+Amount spent	11%
+`
+
+	date := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
+	bal := decimal.NewFromInt(1000)
+	tot := decimal.NewFromInt(100)
+	got := DisplayStats(date, bal, tot, 10)
 
 	if got != want {
 		t.Fatalf("\n GOT: %#v\nWANT: %#v", got, want)
