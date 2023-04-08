@@ -1,5 +1,5 @@
 module github.com/bernardini687/kakebo-golang
 
-go 1.16
+go 1.20
 
-require github.com/shopspring/decimal v1.2.0
+require github.com/shopspring/decimal v1.3.1
