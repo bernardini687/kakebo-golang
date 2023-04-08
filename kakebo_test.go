@@ -8,7 +8,6 @@ import (
 )
 
 // Test FormatEntries
-//
 func TestFormatEntries(t *testing.T) {
 	data := `1.2 foo
 3.45 bar
@@ -92,7 +91,6 @@ bar bar
 }
 
 // Test CalcBalance
-//
 func TestCalcBalance(t *testing.T) {
 	data := `-120 y foo
 -34.5 m bar
@@ -171,7 +169,6 @@ func TestCalcBalanceIntervalErr(t *testing.T) {
 }
 
 // Test CalcMonth
-//
 func TestCalcMonth(t *testing.T) {
 	monthData := `Foo	1.20
 Bar	3.45
@@ -189,7 +186,6 @@ Xyzzy	78.09
 }
 
 // Test DisplayMonth
-//
 func TestDisplayMonth(t *testing.T) {
 	monthData := `Foo	1.20
 Bar	3.45
@@ -216,7 +212,6 @@ Tot	100,00
 }
 
 // Test DisplayStats
-//
 func TestDisplayStats(t *testing.T) {
 	want := `10 November 2009
 
@@ -232,6 +227,44 @@ Amount spent	11%
 	bal := decimal.NewFromInt(1000)
 	tot := decimal.NewFromInt(100)
 	got := DisplayStats(date, bal, tot, 10)
+
+	if got != want {
+		t.Fatalf("\n GOT: %#v\nWANT: %#v", got, want)
+	}
+}
+
+// Test DisplayDues
+func TestDisplayDues(t *testing.T) {
+	dues := `-120 y foo
+-34.5 m bar
+-6 M baz
+789 Y xyzzy
+1200 M incoming
+`
+
+	want := `Incoming	1200,00
+Xyzzy	65,75
+Baz	-6,00
+Foo	-10,00
+Bar	-34,50
+`
+
+	got := DisplayDues(dues)
+
+	if got != want {
+		t.Fatalf("\n GOT: %#v\nWANT: %#v", got, want)
+	}
+}
+
+func TestDisplayDuesInvalidDuesErr(t *testing.T) {
+	dues := `-120 y foo
+-34.5
+-6 M baz
+`
+
+	want := "invalid dues"
+
+	got := DisplayDues(dues)
 
 	if got != want {
 		t.Fatalf("\n GOT: %#v\nWANT: %#v", got, want)

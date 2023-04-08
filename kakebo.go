@@ -2,6 +2,7 @@ package kakebo
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -12,18 +13,17 @@ import (
 //
 // Input example:
 //
-//     1,2 foo
-//     3,45 bar
-//     6 baz
-//     78.09 xyzzy
+//	1,2 foo
+//	3,45 bar
+//	6 baz
+//	78.09 xyzzy
 //
 // Output example:
 //
-//     Foo	1.20
-//     Bar	3.45
-//     Baz	6.00
-//     Xyzzy	78.09
-//
+//	Foo	1.20
+//	Bar	3.45
+//	Baz	6.00
+//	Xyzzy	78.09
 func FormatEntries(entryData string) (string, error) {
 	var formattedEntries []string
 
@@ -57,15 +57,14 @@ func formatEntry(fields []string) (string, error) {
 //
 // Input example:
 //
-//     Foo	1.20
-//     Bar	3.45
-//     Baz	6.00
-//     Xyzzy	78.09
+//	Foo	1.20
+//	Bar	3.45
+//	Baz	6.00
+//	Xyzzy	78.09
 //
 // Output example:
 //
-//     88.74
-//
+//	88.74
 func CalcMonth(monthData string) (decimal.Decimal, error) {
 	return sumValues(monthData, extractFormattedEntryValue)
 }
@@ -78,15 +77,14 @@ func extractFormattedEntryValue(fields []string) (decimal.Decimal, error) {
 //
 // Input example:
 //
-//     -120 y foo
-//     -34.5 m bar
-//     -6 M baz
-//     789 Y xyzzy
+//	-120 y foo
+//	-34.5 m bar
+//	-6 M baz
+//	789 Y xyzzy
 //
 // Output example:
 //
-//     15.25
-//
+//	15.25
 func CalcBalance(dueData string) (decimal.Decimal, error) {
 	return sumValues(dueData, extractDueValue)
 }
@@ -125,20 +123,19 @@ func extractDueValue(fields []string) (decimal.Decimal, error) {
 //
 // Input example:
 //
-//     Foo	1.20
-//     Bar	3.45
-//     Baz	6.00
+//	Foo	1.20
+//	Bar	3.45
+//	Baz	6.00
 //
 // Output example:
 //
-//     January 2020
+//	January 2020
 //
-//     Foo	1,20
-//     Bar	3,45
-//     Baz	6,00
+//	Foo	1,20
+//	Bar	3,45
+//	Baz	6,00
 //
-//     Tot	10,65
-//
+//	Tot	10,65
 func DisplayMonth(date time.Time, monthData string, monthTot decimal.Decimal) string {
 	var lines []string
 
@@ -155,19 +152,18 @@ func DisplayMonth(date time.Time, monthData string, monthTot decimal.Decimal) st
 //
 // Input example:
 //
-//     time.Time{2009/11/10}, decimal.Decimal{1000}, decimal.Decimal{100}, 10
+//	time.Time{2009/11/10}, decimal.Decimal{1000}, decimal.Decimal{100}, 10
 //
 // Output example:
 //
-//     10 November 2009
+//	10 November 2009
 //
-//     Save goal	100,00
-//     Monthly budget	900,00
-//     Daily budget	30,00
+//	Save goal	100,00
+//	Monthly budget	900,00
+//	Daily budget	30,00
 //
-//     End of month	33%
-//     Amount spent	11%
-//
+//	End of month	33%
+//	Amount spent	11%
 func DisplayStats(date time.Time, balance, monthTot decimal.Decimal, savePercentage int) string {
 	var lines []string
 
@@ -217,6 +213,56 @@ func formatStats(stats [][]string) string {
 	}
 
 	return text
+}
+
+type Due struct {
+	Amount      decimal.Decimal
+	Description string
+}
+
+// DisplayDues
+//
+// Input example:
+//
+//	-120 y foo
+//	-34.5 m bar
+//	-6 M baz
+//	789 Y xyzzy
+//	1200 M incoming
+//
+// Output example:
+//
+//	Incoming	1200,00
+//	Xyzzy	65,75
+//	Baz	-6,00
+//	Foo	-10,00
+//	Bar	-34,50
+func DisplayDues(dueData string) string {
+	var dues []Due
+
+	for _, line := range lines(dueData) {
+		fields := strings.Fields(line)
+		val, err := extractDueValue(fields)
+
+		if err != nil {
+			return "invalid dues"
+		}
+		dues = append(dues, Due{val, fields[2]})
+	}
+
+	sort.SliceStable(dues, func(a, b int) bool {
+		return dues[a].Amount.GreaterThan(dues[b].Amount)
+	})
+
+	var lines []string
+
+	for _, due := range dues {
+		lines = append(lines, fmt.Sprintf("%s\t%s\n", strings.Title(due.Description), money(due.Amount)))
+	}
+
+	text := strings.Join(lines, "")
+
+	return replaceDotsWithCommas(text)
 }
 
 //
