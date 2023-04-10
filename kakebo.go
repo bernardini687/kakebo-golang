@@ -232,11 +232,9 @@ type Due struct {
 //
 // Output example:
 //
-//	Incoming	1200,00
-//	Xyzzy	65,75
-//	Baz	-6,00
-//	Foo	-10,00
 //	Bar	-34,50
+//	Foo	-10,00
+//	Baz	-6,00
 func DisplayDues(dueData string) string {
 	var dues []Due
 
@@ -247,7 +245,10 @@ func DisplayDues(dueData string) string {
 		if err != nil {
 			return "invalid dues"
 		}
-		dues = append(dues, Due{val, fields[2]})
+
+		if val.LessThan(decimal.Zero) {
+			dues = append(dues, Due{decimal.Decimal.Abs(val), fields[2]})
+		}
 	}
 
 	sort.SliceStable(dues, func(a, b int) bool {

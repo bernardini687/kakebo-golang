@@ -242,11 +242,9 @@ func TestDisplayDues(t *testing.T) {
 1200 M incoming
 `
 
-	want := `Incoming	1200,00
-Xyzzy	65,75
-Baz	-6,00
-Foo	-10,00
-Bar	-34,50
+	want := `Bar	34,50
+Foo	10,00
+Baz	6,00
 `
 
 	got := DisplayDues(dues)
